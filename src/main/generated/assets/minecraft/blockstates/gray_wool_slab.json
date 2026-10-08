@@ -1,0 +1,74 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "minecraft:block/gray_wool"
+      },
+      "when": {
+        "type": "double"
+      }
+    },
+    {
+      "apply": {
+        "model": "minecraft:block/gray_wool_slab"
+      },
+      "when": {
+        "type": "bottom",
+        "alignment": "horizontal"
+      }
+    },
+    {
+      "apply": {
+        "model": "minecraft:block/gray_wool_slab",
+        "uvlock": true,
+        "z": 90
+      },
+      "when": {
+        "type": "bottom",
+        "alignment": "vertical_north"
+      }
+    },
+    {
+      "apply": {
+        "model": "minecraft:block/gray_wool_slab",
+        "uvlock": true,
+        "x": 90
+      },
+      "when": {
+        "type": "bottom",
+        "alignment": "vertical_west"
+      }
+    },
+    {
+      "apply": {
+        "model": "minecraft:block/gray_wool_slab_top"
+      },
+      "when": {
+        "type": "top",
+        "alignment": "horizontal"
+      }
+    },
+    {
+      "apply": {
+        "model": "minecraft:block/gray_wool_slab_top",
+        "uvlock": true,
+        "z": 90
+      },
+      "when": {
+        "type": "top",
+        "alignment": "vertical_north"
+      }
+    },
+    {
+      "apply": {
+        "model": "minecraft:block/gray_wool_slab_top",
+        "uvlock": true,
+        "x": 90
+      },
+      "when": {
+        "type": "top",
+        "alignment": "vertical_west"
+      }
+    }
+  ]
+}
