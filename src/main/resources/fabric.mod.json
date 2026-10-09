@@ -19,7 +19,7 @@
 			"net.fryc.frycvertslabs.VertSlabs"
 		],
 		"fabric-datagen": [
-			"net.fryc.frycvertslabs.data.VertSlabsDataGenerator"
+			"net.fryc.frycvertslabs.datagen.VertSlabsDataGenerator"
 		]
 	},
 	"mixins": [
