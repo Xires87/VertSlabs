@@ -1,6 +1,7 @@
 package net.fryc.frycvertslabs.datagen;
 
 import com.mojang.math.Quadrant;
+import com.mojang.math.Transformation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
@@ -8,16 +9,24 @@ import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fryc.frycvertslabs.VertSlabs;
 import net.fryc.frycvertslabs.blocks.ModBlockStateProperties;
 import net.fryc.frycvertslabs.blocks.SlabAlignment;
+import net.fryc.frycvertslabs.components.ModDataComponentTypes;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.MultiVariant;
 import net.minecraft.client.data.models.blockstates.MultiPartGenerator;
+import net.minecraft.client.data.models.model.ItemModelUtils;
 import net.minecraft.client.renderer.block.dispatch.VariantMutator;
+import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.properties.select.ComponentContents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.SlabType;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.List;
 import java.util.Map;
@@ -106,7 +115,35 @@ public class VertSlabsModelProvider extends FabricModelProvider {
 
     @Override
     public void generateItemModels(ItemModelGenerators itemModelGenerators) {
+        List<Item> list = BuiltInRegistries.ITEM
+                .stream()
+                .filter(item -> item instanceof BlockItem blockItem && blockItem.getBlock() instanceof SlabBlock)
+                .toList();
 
+        Transformation verticalTransform = new Transformation(
+                new Vector3f(0.707F, 0.0F, 0.0F),
+                new Quaternionf(0.0, 0.0, 0.0, 1.0),
+                new Vector3f(1.0F, 1.0F, 1.0F),
+                new Quaternionf(0.0, 0.0, 0.707, 0.707)
+        );
+
+        list.forEach(item -> {
+            Identifier id = cutPrefix(BuiltInRegistries.ITEM.getKey(item));
+            Identifier modelId = Identifier.fromNamespaceAndPath(id.getNamespace(), BLOCK_DIR + id.getPath());
+
+            ItemModel.Unbaked vertModel = ItemModelUtils.plainModel(modelId, verticalTransform);
+            ItemModel.Unbaked model = ItemModelUtils.plainModel(modelId);
+
+            itemModelGenerators.itemModelOutput.accept(
+                    item,
+                    ItemModelUtils.select(
+                            new ComponentContents<>(ModDataComponentTypes.SLAB_VERTICAL),
+                            model,
+                            ItemModelUtils.when(true, vertModel),
+                            ItemModelUtils.when(false, model)
+                    )
+            );
+        });
     }
 
     private static Optional<Identifier> tryToFindFullBlockById(Identifier fullBlockId) {
