@@ -1,11 +1,9 @@
 package net.fryc.frycvertslabs;
 
 import net.fabricmc.api.ModInitializer;
-
 import net.fryc.frycvertslabs.blocks.ModBlockStateProperties;
 import net.fryc.frycvertslabs.components.ModDataComponentTypes;
 import net.minecraft.resources.Identifier;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
