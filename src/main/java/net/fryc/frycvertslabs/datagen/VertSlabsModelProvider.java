@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.SlabType;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
@@ -33,6 +34,14 @@ public class VertSlabsModelProvider extends FabricModelProvider {
             "s",
             "_planks",
             "_block"
+    );
+
+    private static final List<String> IGNORED_PREFIXES = List.of(
+            "waxed_"
+    );
+
+    private static final Map<String, String> HANDMADE_CORRECTIONS = Map.of(
+            "bamboo", "bamboo_planks"
     );
 
     public VertSlabsModelProvider(FabricPackOutput output) {
@@ -50,7 +59,7 @@ public class VertSlabsModelProvider extends FabricModelProvider {
         list.forEach(el -> VertSlabs.LOGGER.info(el.toString()));
 
         list.forEach(block -> {
-            Identifier id = BuiltInRegistries.BLOCK.getKey(block);
+            Identifier id = cutPrefix(BuiltInRegistries.BLOCK.getKey(block));
             Identifier bottomId = Identifier.fromNamespaceAndPath(id.getNamespace(), BLOCK_DIR + id.getPath());
             Identifier topId = Identifier.fromNamespaceAndPath(id.getNamespace(), BLOCK_DIR + id.getPath() + TOP_SUFFIX);
             Identifier fullBlockId = Identifier.fromNamespaceAndPath(id.getNamespace(), id.getPath().replace(SLAB_SUFFIX, ""));
@@ -100,14 +109,33 @@ public class VertSlabsModelProvider extends FabricModelProvider {
 
     }
 
-    private static Optional<Identifier> tryToFindFullBlockById(Identifier slabId) {
+    private static Optional<Identifier> tryToFindFullBlockById(Identifier fullBlockId) {
+        if(shouldPerformHandmadeCorrection(fullBlockId)) {
+            return Optional.of(performHandmadeCorrection(fullBlockId));
+        }
+
         for(String suffix : POSSIBLE_FULL_BLOCK_SUFFIXES) {
-            Identifier id = Identifier.fromNamespaceAndPath(slabId.getNamespace(), slabId.getPath() + suffix);
+            Identifier id = Identifier.fromNamespaceAndPath(fullBlockId.getNamespace(), fullBlockId.getPath() + suffix);
             if(BuiltInRegistries.BLOCK.get(id).isPresent()) {
                 return Optional.of(id);
             }
         }
 
         return Optional.empty();
+    }
+
+    private static Identifier cutPrefix(Identifier id) {
+        return Identifier.fromNamespaceAndPath(
+                id.getNamespace(),
+                id.getPath().replaceFirst(IGNORED_PREFIXES.stream().filter(id.getPath()::startsWith).findFirst().orElse(""), "")
+        );
+    }
+
+    private static boolean shouldPerformHandmadeCorrection(Identifier id) {
+        return HANDMADE_CORRECTIONS.containsKey(id.getPath());
+    }
+
+    private static Identifier performHandmadeCorrection(Identifier id) {
+        return Identifier.fromNamespaceAndPath(id.getNamespace(), HANDMADE_CORRECTIONS.get(id.getPath()));
     }
 }

@@ -2,7 +2,7 @@
   "multipart": [
     {
       "apply": {
-        "model": "minecraft:block/bamboo"
+        "model": "minecraft:block/bamboo_planks"
       },
       "when": {
         "type": "double"

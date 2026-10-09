@@ -2,7 +2,7 @@
   "multipart": [
     {
       "apply": {
-        "model": "minecraft:block/waxed_weathered_cut_copper"
+        "model": "minecraft:block/weathered_cut_copper"
       },
       "when": {
         "type": "double"
@@ -10,7 +10,7 @@
     },
     {
       "apply": {
-        "model": "minecraft:block/waxed_weathered_cut_copper_slab"
+        "model": "minecraft:block/weathered_cut_copper_slab"
       },
       "when": {
         "type": "bottom",
@@ -19,7 +19,7 @@
     },
     {
       "apply": {
-        "model": "minecraft:block/waxed_weathered_cut_copper_slab",
+        "model": "minecraft:block/weathered_cut_copper_slab",
         "uvlock": true,
         "x": 90
       },
@@ -30,7 +30,7 @@
     },
     {
       "apply": {
-        "model": "minecraft:block/waxed_weathered_cut_copper_slab",
+        "model": "minecraft:block/weathered_cut_copper_slab",
         "uvlock": true,
         "z": 90
       },
@@ -41,7 +41,7 @@
     },
     {
       "apply": {
-        "model": "minecraft:block/waxed_weathered_cut_copper_slab_top"
+        "model": "minecraft:block/weathered_cut_copper_slab_top"
       },
       "when": {
         "type": "top",
@@ -50,7 +50,7 @@
     },
     {
       "apply": {
-        "model": "minecraft:block/waxed_weathered_cut_copper_slab_top",
+        "model": "minecraft:block/weathered_cut_copper_slab_top",
         "uvlock": true,
         "x": 90
       },
@@ -61,7 +61,7 @@
     },
     {
       "apply": {
-        "model": "minecraft:block/waxed_weathered_cut_copper_slab_top",
+        "model": "minecraft:block/weathered_cut_copper_slab_top",
         "uvlock": true,
         "z": 90
       },
