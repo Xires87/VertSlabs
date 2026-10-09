@@ -2,7 +2,10 @@ package net.fryc.frycvertslabs.mixin;
 
 import net.fryc.frycvertslabs.blocks.ModBlockStateProperties;
 import net.fryc.frycvertslabs.blocks.SlabAlignment;
+import net.fryc.frycvertslabs.components.ModDataComponentTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
@@ -10,6 +13,9 @@ import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -20,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import oshi.util.tuples.Pair;
 
 @Mixin(SlabBlock.class)
 abstract class SlabBlockMixin extends Block implements SimpleWaterloggedBlock {
@@ -30,10 +37,10 @@ abstract class SlabBlockMixin extends Block implements SimpleWaterloggedBlock {
 	@Shadow
 	private static @Final VoxelShape SHAPE_TOP;
 
-	private static final VoxelShape SHAPE_LEFT_NORTH = Block.box(0, 0, 0, 8, 16, 16);
-	private static final VoxelShape SHAPE_RIGHT_NORTH = Block.box(8, 0, 0, 16, 16, 16);
-	private static final VoxelShape SHAPE_LEFT_WEST = Block.box(0, 0, 8, 16, 16, 16);
-	private static final VoxelShape SHAPE_RIGHT_WEST = Block.box(0, 0, 0, 16, 16, 8);
+	private static final VoxelShape SHAPE_LEFT_WEST = Block.box(0, 0, 0, 8, 16, 16);
+	private static final VoxelShape SHAPE_RIGHT_WEST = Block.box(8, 0, 0, 16, 16, 16);
+	private static final VoxelShape SHAPE_LEFT_NORTH = Block.box(0, 0, 8, 16, 16, 16);
+	private static final VoxelShape SHAPE_RIGHT_NORTH = Block.box(0, 0, 0, 16, 16, 8);
 
 
 	public SlabBlockMixin(Properties properties) {
@@ -75,6 +82,46 @@ abstract class SlabBlockMixin extends Block implements SimpleWaterloggedBlock {
 	@Inject(at = @At("TAIL"), method = "createBlockStateDefinition(Lnet/minecraft/world/level/block/state/StateDefinition$Builder;)V")
 	private void addNewBlockStateProperties(StateDefinition.Builder<Block, BlockState> builder, CallbackInfo info) {
 		builder.add(ModBlockStateProperties.SLAB_ALIGNMENT);
+	}
+
+
+	@Inject(at = @At("HEAD"), method = "getStateForPlacement(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/level/block/state/BlockState;", cancellable = true)
+	private void modifyStateForPlacementWhenVertical(BlockPlaceContext context, CallbackInfoReturnable<BlockState> ret) {
+		if(context.getItemInHand().getOrDefault(ModDataComponentTypes.SLAB_VERTICAL, false)){
+			BlockPos pos = context.getClickedPos();
+			BlockState replacedBlockState = context.getLevel().getBlockState(pos);
+			if (replacedBlockState.is(this)) {
+				ret.setReturnValue(replacedBlockState.setValue(SlabBlock.TYPE, SlabType.DOUBLE).setValue(SlabBlock.WATERLOGGED, false));
+			}
+			else {
+				FluidState replacedFluidState = context.getLevel().getFluidState(pos);
+				BlockState result = this.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM).setValue(SlabBlock.WATERLOGGED, replacedFluidState.is(Fluids.WATER));
+
+				Direction clickedFace = context.getClickedFace();
+				Pair<SlabType, SlabAlignment> pair = getStatesForVerticalPlacement(clickedFace);
+
+				ret.setReturnValue(result.setValue(SlabBlock.TYPE, pair.getA()).setValue(ModBlockStateProperties.SLAB_ALIGNMENT, pair.getB()));
+
+
+				//ret.setReturnValue(clickedFace != Direction.DOWN && (clickedFace == Direction.UP || !(context.getClickLocation().y - (double)pos.getY() > (double)0.5F)) ? result : (BlockState)result.setValue(SlabBlock.TYPE, SlabType.TOP));
+			}
+		}
+	}
+
+	private static Pair<SlabType, SlabAlignment> getStatesForVerticalPlacement(Direction clickedFace) {
+		if(clickedFace.getAxisDirection() == Direction.AxisDirection.NEGATIVE) {
+			return switch (clickedFace.getAxis()) {
+				case X -> new Pair<>(SlabType.TOP, SlabAlignment.VERTICAL_WEST);
+				case Y -> new Pair<>(SlabType.BOTTOM, SlabAlignment.VERTICAL_NORTH);
+				case Z -> new Pair<>(SlabType.BOTTOM, SlabAlignment.VERTICAL_NORTH);
+			};
+		}
+
+		return switch (clickedFace.getAxis()) {
+			case X -> new Pair<>(SlabType.BOTTOM, SlabAlignment.VERTICAL_WEST);
+			case Y -> new Pair<>(SlabType.TOP, SlabAlignment.VERTICAL_NORTH);
+			case Z -> new Pair<>(SlabType.TOP, SlabAlignment.VERTICAL_NORTH);
+		};
 	}
 
 }

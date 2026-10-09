@@ -31,7 +31,8 @@ public class VertSlabsModelProvider extends FabricModelProvider {
     private static final List<String> POSSIBLE_FULL_BLOCK_SUFFIXES = List.of(
             "",
             "s",
-            "_planks"
+            "_planks",
+            "_block"
     );
 
     public VertSlabsModelProvider(FabricPackOutput output) {
@@ -72,11 +73,11 @@ public class VertSlabsModelProvider extends FabricModelProvider {
                                 .with(BlockModelGenerators
                                         .condition()
                                         .term(ModBlockStateProperties.SLAB_ALIGNMENT, SlabAlignment.VERTICAL_NORTH)
-                                        .term(BlockStateProperties.SLAB_TYPE, SlabType.BOTTOM), bottomModel.with(VariantMutator.UV_LOCK.withValue(true)).with(VariantMutator.Z_ROT.withValue(Quadrant.R90)))
+                                        .term(BlockStateProperties.SLAB_TYPE, SlabType.BOTTOM), bottomModel.with(VariantMutator.UV_LOCK.withValue(true)).with(VariantMutator.X_ROT.withValue(Quadrant.R90)))
                                 .with(BlockModelGenerators
                                         .condition()
                                         .term(ModBlockStateProperties.SLAB_ALIGNMENT, SlabAlignment.VERTICAL_WEST)
-                                        .term(BlockStateProperties.SLAB_TYPE, SlabType.BOTTOM), bottomModel.with(VariantMutator.UV_LOCK.withValue(true)).with(VariantMutator.X_ROT.withValue(Quadrant.R90)))
+                                        .term(BlockStateProperties.SLAB_TYPE, SlabType.BOTTOM), bottomModel.with(VariantMutator.UV_LOCK.withValue(true)).with(VariantMutator.Z_ROT.withValue(Quadrant.R90)))
                                 .with(BlockModelGenerators
                                         .condition()
                                         .term(ModBlockStateProperties.SLAB_ALIGNMENT, SlabAlignment.HORIZONTAL)
@@ -84,11 +85,11 @@ public class VertSlabsModelProvider extends FabricModelProvider {
                                 .with(BlockModelGenerators
                                         .condition()
                                         .term(ModBlockStateProperties.SLAB_ALIGNMENT, SlabAlignment.VERTICAL_NORTH)
-                                        .term(BlockStateProperties.SLAB_TYPE, SlabType.TOP), topModel.with(VariantMutator.UV_LOCK.withValue(true)).with(VariantMutator.Z_ROT.withValue(Quadrant.R90)))
+                                        .term(BlockStateProperties.SLAB_TYPE, SlabType.TOP), topModel.with(VariantMutator.UV_LOCK.withValue(true)).with(VariantMutator.X_ROT.withValue(Quadrant.R90)))
                                 .with(BlockModelGenerators
                                         .condition()
                                         .term(ModBlockStateProperties.SLAB_ALIGNMENT, SlabAlignment.VERTICAL_WEST)
-                                        .term(BlockStateProperties.SLAB_TYPE, SlabType.TOP), topModel.with(VariantMutator.UV_LOCK.withValue(true)).with(VariantMutator.X_ROT.withValue(Quadrant.R90)))
+                                        .term(BlockStateProperties.SLAB_TYPE, SlabType.TOP), topModel.with(VariantMutator.UV_LOCK.withValue(true)).with(VariantMutator.Z_ROT.withValue(Quadrant.R90)))
                 );
             }
         });

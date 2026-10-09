@@ -21,7 +21,7 @@
       "apply": {
         "model": "minecraft:block/polished_deepslate_slab",
         "uvlock": true,
-        "z": 90
+        "x": 90
       },
       "when": {
         "type": "bottom",
@@ -32,7 +32,7 @@
       "apply": {
         "model": "minecraft:block/polished_deepslate_slab",
         "uvlock": true,
-        "x": 90
+        "z": 90
       },
       "when": {
         "type": "bottom",
@@ -52,7 +52,7 @@
       "apply": {
         "model": "minecraft:block/polished_deepslate_slab_top",
         "uvlock": true,
-        "z": 90
+        "x": 90
       },
       "when": {
         "type": "top",
@@ -63,7 +63,7 @@
       "apply": {
         "model": "minecraft:block/polished_deepslate_slab_top",
         "uvlock": true,
-        "x": 90
+        "z": 90
       },
       "when": {
         "type": "top",
