@@ -1,6 +1,8 @@
-package net.fryc.frycvertslabs.data;
+package net.fryc.frycvertslabs.datagen;
 
 import com.mojang.math.Quadrant;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fryc.frycvertslabs.blocks.ModBlockStateProperties;
@@ -20,6 +22,7 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import java.util.List;
 import java.util.Optional;
 
+@Environment(EnvType.CLIENT)
 public class VertSlabsModelProvider extends FabricModelProvider {
 
     private static final String BLOCK_DIR = "block/";

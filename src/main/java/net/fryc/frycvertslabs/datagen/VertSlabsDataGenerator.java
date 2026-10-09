@@ -1,4 +1,4 @@
-package net.fryc.frycvertslabs.data;
+package net.fryc.frycvertslabs.datagen;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
