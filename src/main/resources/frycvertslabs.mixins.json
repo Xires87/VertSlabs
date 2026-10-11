@@ -4,7 +4,8 @@
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"SlabBlockMixin",
-		"ItemMixin"
+		"ItemMixin",
+		"ItemStackMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
