@@ -1,16 +1,16 @@
 package net.fryc.frycvertslabs.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.fryc.frycvertslabs.blocks.ModBlockStateProperties;
 import net.fryc.frycvertslabs.blocks.SlabAlignment;
 import net.fryc.frycvertslabs.components.ModDataComponentTypes;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.SlabType;
@@ -49,7 +49,7 @@ abstract class SlabBlockMixin extends Block implements SimpleWaterloggedBlock {
 
 
 	@Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V")
-	private void defaultAlignmentProperty(BlockBehaviour.Properties properties, CallbackInfo info) {
+	private void defaultAlignmentProperty(Properties properties, CallbackInfo info) {
 		this.registerDefaultState(this.defaultBlockState().setValue(ModBlockStateProperties.SLAB_ALIGNMENT, SlabAlignment.HORIZONTAL));
 	}
 
@@ -79,6 +79,51 @@ abstract class SlabBlockMixin extends Block implements SimpleWaterloggedBlock {
 		}
 	}
 
+
+	@Inject(at = @At("HEAD"), method = "canBeReplaced(" +
+				"Lnet/minecraft/world/level/block/state/BlockState;" +
+				"Lnet/minecraft/world/item/context/BlockPlaceContext;" +
+			")Z", cancellable = true)
+	private void modifyReplacementRules(BlockState state, BlockPlaceContext context, CallbackInfoReturnable<Boolean> ret) {
+		ItemStack itemStack = context.getItemInHand();
+		if(itemStack.getOrDefault(ModDataComponentTypes.SLAB_VERTICAL, false)) {
+			SlabType type = state.getValue(SlabBlock.TYPE);
+			SlabAlignment alignment = state.getValue(ModBlockStateProperties.SLAB_ALIGNMENT);
+			if (type != SlabType.DOUBLE && alignment != SlabAlignment.HORIZONTAL && itemStack.is(this.asItem())) {
+				if (context.replacingClickedOnBlock()) {
+					switch (context.getClickedFace()) {
+						case NORTH -> ret.setReturnValue(type == SlabType.BOTTOM && alignment == SlabAlignment.VERTICAL_NORTH);
+						case EAST -> ret.setReturnValue(type == SlabType.BOTTOM && alignment == SlabAlignment.VERTICAL_WEST);
+						case WEST -> ret.setReturnValue(type == SlabType.TOP && alignment == SlabAlignment.VERTICAL_WEST);
+						case SOUTH -> ret.setReturnValue(type == SlabType.TOP && alignment == SlabAlignment.VERTICAL_NORTH);
+						case UP -> {
+							ret.setReturnValue(context.getClickLocation().y - context.getClickedPos().getY() < 0.5);
+						}
+						case DOWN -> {
+							ret.setReturnValue(context.getClickLocation().y - context.getClickedPos().getY() > 0.5);
+						}
+					}
+				}
+				else {
+					ret.setReturnValue(true);
+				}
+			}
+			else {
+				ret.setReturnValue(false);
+			}
+		}
+	}
+
+
+	@ModifyExpressionValue(
+			method = "canBeReplaced(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/item/context/BlockPlaceContext;)Z",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Ljava/lang/Object;)Z")
+	)
+	private boolean disallowCombiningHorizontalSlabsWithVertical(boolean original, BlockState state, BlockPlaceContext context) {
+		return original && state.getValue(ModBlockStateProperties.SLAB_ALIGNMENT) == SlabAlignment.HORIZONTAL;
+	}
+
+
 	@Inject(at = @At("TAIL"), method = "createBlockStateDefinition(Lnet/minecraft/world/level/block/state/StateDefinition$Builder;)V")
 	private void addNewBlockStateProperties(StateDefinition.Builder<Block, BlockState> builder, CallbackInfo info) {
 		builder.add(ModBlockStateProperties.SLAB_ALIGNMENT);
@@ -97,30 +142,20 @@ abstract class SlabBlockMixin extends Block implements SimpleWaterloggedBlock {
 				FluidState replacedFluidState = context.getLevel().getFluidState(pos);
 				BlockState result = this.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM).setValue(SlabBlock.WATERLOGGED, replacedFluidState.is(Fluids.WATER));
 
-				Direction clickedFace = context.getClickedFace();
-				Pair<SlabType, SlabAlignment> pair = getStatesForVerticalPlacement(clickedFace);
+				Pair<SlabType, SlabAlignment> pair = getStatesForVerticalPlacement(context);
 
 				ret.setReturnValue(result.setValue(SlabBlock.TYPE, pair.getA()).setValue(ModBlockStateProperties.SLAB_ALIGNMENT, pair.getB()));
-
-
-				//ret.setReturnValue(clickedFace != Direction.DOWN && (clickedFace == Direction.UP || !(context.getClickLocation().y - (double)pos.getY() > (double)0.5F)) ? result : (BlockState)result.setValue(SlabBlock.TYPE, SlabType.TOP));
 			}
 		}
 	}
 
-	private static Pair<SlabType, SlabAlignment> getStatesForVerticalPlacement(Direction clickedFace) {
-		if(clickedFace.getAxisDirection() == Direction.AxisDirection.NEGATIVE) {
-			return switch (clickedFace.getAxis()) {
-				case X -> new Pair<>(SlabType.TOP, SlabAlignment.VERTICAL_WEST);
-				case Y -> new Pair<>(SlabType.BOTTOM, SlabAlignment.VERTICAL_NORTH);
-				case Z -> new Pair<>(SlabType.BOTTOM, SlabAlignment.VERTICAL_NORTH);
-			};
-		}
-
-		return switch (clickedFace.getAxis()) {
-			case X -> new Pair<>(SlabType.BOTTOM, SlabAlignment.VERTICAL_WEST);
-			case Y -> new Pair<>(SlabType.TOP, SlabAlignment.VERTICAL_NORTH);
-			case Z -> new Pair<>(SlabType.TOP, SlabAlignment.VERTICAL_NORTH);
+	private static Pair<SlabType, SlabAlignment> getStatesForVerticalPlacement(BlockPlaceContext context) {
+		return switch (context.getHorizontalDirection()) {
+			case NORTH -> new Pair<>(context.getClickedPos().getZ() - context.getClickLocation().z() < -0.5 ? SlabType.BOTTOM : SlabType.TOP, SlabAlignment.VERTICAL_NORTH);
+			case SOUTH -> new Pair<>(context.getClickedPos().getZ() - context.getClickLocation().z() > -0.5 ? SlabType.TOP : SlabType.BOTTOM, SlabAlignment.VERTICAL_NORTH);
+			case WEST -> new Pair<>(context.getClickedPos().getX() - context.getClickLocation().x() > -0.5 ? SlabType.BOTTOM : SlabType.TOP, SlabAlignment.VERTICAL_WEST);
+			case EAST -> new Pair<>(context.getClickedPos().getX() - context.getClickLocation().x() < -0.5 ? SlabType.TOP : SlabType.BOTTOM, SlabAlignment.VERTICAL_WEST);
+			default -> new Pair<>(SlabType.BOTTOM, SlabAlignment.VERTICAL_NORTH);
 		};
 	}
 
