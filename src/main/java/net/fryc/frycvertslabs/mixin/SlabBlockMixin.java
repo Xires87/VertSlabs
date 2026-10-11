@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.fryc.frycvertslabs.blocks.ModBlockStateProperties;
 import net.fryc.frycvertslabs.blocks.SlabAlignment;
 import net.fryc.frycvertslabs.components.ModDataComponentTypes;
+import net.fryc.frycvertslabs.util.SlabHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -37,11 +38,6 @@ abstract class SlabBlockMixin extends Block implements SimpleWaterloggedBlock {
 	@Shadow
 	private static @Final VoxelShape SHAPE_TOP;
 
-	private static final VoxelShape SHAPE_LEFT_WEST = Block.box(0, 0, 0, 8, 16, 16);
-	private static final VoxelShape SHAPE_RIGHT_WEST = Block.box(8, 0, 0, 16, 16, 16);
-	private static final VoxelShape SHAPE_LEFT_NORTH = Block.box(0, 0, 8, 16, 16, 16);
-	private static final VoxelShape SHAPE_RIGHT_NORTH = Block.box(0, 0, 0, 16, 16, 8);
-
 
 	public SlabBlockMixin(Properties properties) {
 		super(properties);
@@ -64,15 +60,15 @@ abstract class SlabBlockMixin extends Block implements SimpleWaterloggedBlock {
 			case HORIZONTAL -> {}
 			case VERTICAL_NORTH -> {
 				switch (state.getValue(SlabBlock.TYPE)) {
-					case TOP -> ret.setReturnValue(SHAPE_RIGHT_NORTH);
-					case BOTTOM -> ret.setReturnValue(SHAPE_LEFT_NORTH);
+					case TOP -> ret.setReturnValue(SlabHelper.SHAPE_RIGHT_NORTH);
+					case BOTTOM -> ret.setReturnValue(SlabHelper.SHAPE_LEFT_NORTH);
 					case DOUBLE -> ret.setReturnValue(Shapes.block());
 				}
 			}
 			case VERTICAL_WEST -> {
 				switch (state.getValue(SlabBlock.TYPE)) {
-					case TOP -> ret.setReturnValue(SHAPE_RIGHT_WEST);
-					case BOTTOM -> ret.setReturnValue(SHAPE_LEFT_WEST);
+					case TOP -> ret.setReturnValue(SlabHelper.SHAPE_RIGHT_WEST);
+					case BOTTOM -> ret.setReturnValue(SlabHelper.SHAPE_LEFT_WEST);
 					case DOUBLE -> ret.setReturnValue(Shapes.block());
 				}
 			}
@@ -142,21 +138,10 @@ abstract class SlabBlockMixin extends Block implements SimpleWaterloggedBlock {
 				FluidState replacedFluidState = context.getLevel().getFluidState(pos);
 				BlockState result = this.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM).setValue(SlabBlock.WATERLOGGED, replacedFluidState.is(Fluids.WATER));
 
-				Pair<SlabType, SlabAlignment> pair = getStatesForVerticalPlacement(context);
+				Pair<SlabType, SlabAlignment> pair = SlabHelper.getStatesForVerticalPlacement(context);
 
 				ret.setReturnValue(result.setValue(SlabBlock.TYPE, pair.getA()).setValue(ModBlockStateProperties.SLAB_ALIGNMENT, pair.getB()));
 			}
 		}
 	}
-
-	private static Pair<SlabType, SlabAlignment> getStatesForVerticalPlacement(BlockPlaceContext context) {
-		return switch (context.getHorizontalDirection()) {
-			case NORTH -> new Pair<>(context.getClickedPos().getZ() - context.getClickLocation().z() < -0.5 ? SlabType.BOTTOM : SlabType.TOP, SlabAlignment.VERTICAL_NORTH);
-			case SOUTH -> new Pair<>(context.getClickedPos().getZ() - context.getClickLocation().z() > -0.5 ? SlabType.TOP : SlabType.BOTTOM, SlabAlignment.VERTICAL_NORTH);
-			case WEST -> new Pair<>(context.getClickedPos().getX() - context.getClickLocation().x() > -0.5 ? SlabType.BOTTOM : SlabType.TOP, SlabAlignment.VERTICAL_WEST);
-			case EAST -> new Pair<>(context.getClickedPos().getX() - context.getClickLocation().x() < -0.5 ? SlabType.TOP : SlabType.BOTTOM, SlabAlignment.VERTICAL_WEST);
-			default -> new Pair<>(SlabType.BOTTOM, SlabAlignment.VERTICAL_NORTH);
-		};
-	}
-
 }
