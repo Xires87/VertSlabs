@@ -11,7 +11,7 @@ Horizontal and vertical slabs can stack, no matter how they are rotated.
 
 ### [Curseforge](https://www.curseforge.com/minecraft/mc-mods/vertical-slabs-for-everyone)
 
-### Modrinth
+### [Modrinth](https://modrinth.com/mod/vertical-slabs-for-everyone)
 
 ---
 
