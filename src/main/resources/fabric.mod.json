@@ -8,8 +8,9 @@
 		"Xires87"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/Xires87/VertSlabs"
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/vertical-slabs-for-everyone",
+		"sources": "https://github.com/Xires87/VertSlabs",
+		"issues": "https://github.com/Xires87/VertSlabs/issues"
 	},
 	"license": "MIT",
 	"icon": "assets/frycvertslabs/icon.png",
